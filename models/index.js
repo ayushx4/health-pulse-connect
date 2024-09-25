@@ -1,7 +1,11 @@
-const doctoreModel = require('./doctorModel')
+const guardianModel = require('./guardianModel')
 const userModel = require('./userModel')
+const patientModel = require('./patientModel')
+const OtpModel = require('./otpModel')
 
 module.exports = {
-  doctoreModel,
-  userModel
+  guardianModel,
+  userModel,
+  patientModel,
+  OtpModel
 }

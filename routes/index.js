@@ -1,7 +1,7 @@
 const doctorRouter= require('./doctorRouter')
-const userRouter = require('./userRouter')
+const guardianRouter = require('./guardianRouter')
 
 module.exports = {
   doctorRouter,
-  userRouter
+  guardianRouter,
 }

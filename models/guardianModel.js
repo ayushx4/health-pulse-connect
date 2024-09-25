@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose")
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
@@ -9,13 +9,8 @@ const isAdult = (dateOfBirth) => {
   return age >= 18
 }
 
-const doctorSchema = new mongoose.Schema({
-  approval_status: {
-    type: String,
-    required: true,
-    enum: ['Pending', 'Approved', 'Rejected'],
-    default: 'Pending'
-  },
+const guardianSchema = mongoose.Schema({
+
   isProfileComplete: {
     type: Boolean,
     required: true,
@@ -29,10 +24,10 @@ const doctorSchema = new mongoose.Schema({
   },
   date_of_birth: {
     type: Date,
-    validate:{
+    validate: {
       validator: isAdult,
-      message: 'Guardian must be at least 18 years old',
-    }
+      message: 'Guardian must be at least 18 years old', // Error message
+    },
   },
   address: {
     type: String,
@@ -50,40 +45,18 @@ const doctorSchema = new mongoose.Schema({
   phoneNumber: {
     type: Number,
     unique: true,
-    sparse: true, // This ensures that the uniqueness constraint only applies to non-null values
+    sparse: true,
     match: [/^\d{10}$/, 'Phone number must be 10 digits'] 
   },
-  registration: {
-    establishment_name: {
-      type: String,
-    },
-    registration_number: {
-      type: String,
-    },
-    registration_council: {
-      type: String,
-    },
-    place_of_establishment: {
-      type: String,
-    },
-    id_image: {
-      type: String,
-    },
-    selfie_image: {
-      type: String,
+  children: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'patient',
     }
-  },
-  verified:{
-    type: Boolean,
-    default: false
-  },
-  patients: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'patient'
-  }]
-}, { timestamps: true})
+  ]
+}, { timestamps: true })
 
-doctorSchema.pre("save", async function (next) {
+guardianSchema.pre("save", async function(next) {
 
   if(this.isNew)
     return next()
@@ -95,24 +68,25 @@ doctorSchema.pre("save", async function (next) {
   next()
 })
 
-doctorSchema.pre("save", function(next) {
+guardianSchema.pre("save", function(next) {
 
-  const requiredFields = ['name', 'surname', 'address', 'phoneNumber']
+  const requiredFields = ['name', 'surname', 'date_of_birth', 'address', 'phoneNumber']
   const isComplete = requiredFields.every(field => !!this[field])
+
   this.isProfileComplete = isComplete
   next()
 })
 
-doctorSchema.methods.validatePassword = async function(inputPassword) {
+guardianSchema.methods.validatePassword = async function(inputPassword) {
   const isMatch = await bcrypt.compare(inputPassword, this.password)
   
   if (!isMatch)
     throw new Error('Invalid email or password')
   
-  return this
+  return this 
 }
 
-doctorSchema.methods.generateAccessToken = function (){
+guardianSchema.methods.generateAccessToken = function() {
   const payload = {
     id: this._id,
     email: this.email,
@@ -126,5 +100,5 @@ doctorSchema.methods.generateAccessToken = function (){
   )
 }
 
-const Doctor = mongoose.model('Doctor', doctorSchema)
-module.exports = Doctor
+const GuardianModel = mongoose.model("guardian", guardianSchema)
+module.exports = GuardianModel
