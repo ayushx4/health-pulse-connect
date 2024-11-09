@@ -13,8 +13,6 @@ async function getGoogleUserDetail(code) {
 
   const oauth2 = google.oauth2({ auth: oauth2Client, version: 'v2' });
 
-  console.log(` oauth2 is =>> ${JSON.stringify(oauth2.userinfo)}`);
-
   const { data } = await oauth2.userinfo.get();
   console.log(`data is ${JSON.stringify(data)}`);
   return data;
